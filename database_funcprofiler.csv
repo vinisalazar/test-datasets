@@ -1,0 +1,5 @@
+tool,db_name,db_params,db_type,db_path
+humann_v3,humann_v3_testdb,,short,https://github.com/vinisalazar/test-datasets/raw/taxprofiler/data/database/humann_v3/humann_v3_testdb.tar.gz
+humann_v4,humann_v4_testdb,,short,https://github.com/vinisalazar/test-datasets/raw/taxprofiler/data/database/humann_v4/humann_v4_testdb.tar.gz
+fmhfunprofiler,fmhfunprofiler_testdb,,short,https://github.com/vinisalazar/test-datasets/raw/taxprofiler/data/database/fmhfunprofiler/fmhfunprofiler_testdb.tar.gz
+rgi,rgi_testdb,,short,https://github.com/vinisalazar/test-datasets/raw/taxprofiler/data/database/rgi/rgi_testdb.tar.gz
