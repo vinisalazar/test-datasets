@@ -231,3 +231,19 @@ Read IDs keep their `ecoli`/`bfrag` prefix, so the fixture doubles as its own gr
 `nf-core/test-datasets` once the branch is merged upstream. `database_longread.csv` carries the
 `db_type` column (`long` on every row) and passes `--long-reads` to DIAMOND as `db_params`, following
 `nf-core/taxprofiler`'s `database_v3.0.csv`.
+
+### The DIAMOND row cannot be validated with the demo database
+
+DIAMOND runs and publishes on this fixture, but its output is empty, and that is a property of the demo
+database rather than of long reads. `data/database/eggnog-mapper/proteome.dmnd` is built from the
+SARS-CoV-2 proteome — 12 sequences, 14,149 letters — which shares no biology with a gut community:
+
+| Query | Alignments |
+|---|---|
+| `test_minigut_hifi.fastq.gz` (643 reads, 9.67 Mbp), no extra args | 0 |
+| `test_minigut_hifi.fastq.gz`, `--long-reads` | 0 |
+| `test_minigut_R1.fastq.gz` (50,000 reads, ~5 Mbp) | 1 |
+
+`--long-reads` is therefore not the cause, and the one short-read alignment is noise: 33.3% identity over
+42 aa at 4.8e-05. Giving DIAMOND a meaningful demo database is a separate piece of work; until then the
+`diamond` row exercises plumbing only.
