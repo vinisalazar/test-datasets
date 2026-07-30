@@ -1,0 +1,2 @@
+sample,run_accession,instrument_platform,fastq_1,fastq_2,fasta
+minigut_hifi,1,PACBIO_SMRT,https://raw.githubusercontent.com/vinisalazar/test-datasets/refs/heads/feat/minigut-hifi/data/reads/test_minigut_hifi.fastq.gz,,

@@ -168,3 +168,66 @@ mkdir data/database/eggnog-mapper
 mv proteome.dmnd data/database/eggnog-mapper/
 
 ```
+
+## Long reads: `data/reads/test_minigut_hifi.fastq.gz`
+
+A simulated PacBio HiFi version of the same `minigut` community as the short-read test data, used by
+`samplesheets/test_longread.csv` and `database_longread.csv`.
+
+Why simulated rather than a real HiFi metagenome: the demo databases on this branch are tuned to the
+minigut community — the FMH FunProfiler sketch above keeps only `K028*` plus `K00147`, chosen by running
+minigut R1 against the full database. A HiFi fixture from any other community returns empty profiles
+against them, so it cannot show that long reads are profiled correctly. Keeping the community identical
+also makes short-read and long-read output directly comparable.
+
+Community, taken from `test-datasets@mag:test_data/test_minigut_abundance.txt.gz`:
+
+| Accession | Organism | Abundance |
+|---|---|---|
+| `NC_000913.3` | *Escherichia coli* K-12 MG1655 | 0.42 |
+| `NC_006347.1` | *Bacteroides fragilis* YCH46 | 0.58 |
+
+Abundances are applied as a fraction of total simulated bases, so per-genome depth is
+`fraction * 10 Mbp / genome_length` — 0.9049x for E. coli, 1.0991x for B. fragilis.
+
+Resulting file: 643 reads, 9,665,815 bp, mean read 15,032 bp (min 7,814, max 25,915), N50 15,594,
+Q30 97.5%, 8.6 MB gzipped.
+
+```bash
+conda create -n pbsim3 -c conda-forge -c bioconda pbsim3 pbccs samtools seqkit
+conda activate pbsim3
+
+mkdir -p ref data/reads && cd ref
+for acc in NC_000913.3 NC_006347.1 ; do
+  curl -sSL "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=${acc}&rettype=fasta&retmode=text" -o ${acc}.fa
+done
+cd ..
+
+# MODELS is the data/ directory of the pbsim3 installation ($CONDA_PREFIX/data).
+# --pass-num 10 makes pbsim3 emit a multi-pass subread BAM, which is what ccs consumes to
+# produce HiFi reads; difference-ratio 22:45:33 is pbsim3's recommended PacBio Sequel setting.
+simulate () {  # tag accession depth seed
+  pbsim --strategy wgs \
+        --method qshmm --qshmm $MODELS/QSHMM-RSII.model \
+        --genome ref/$2.fa --depth $3 --seed $4 \
+        --length-mean 15000 --length-sd 3000 --length-min 5000 --length-max 30000 \
+        --accuracy-mean 0.85 --difference-ratio 22:45:33 --pass-num 10 \
+        --prefix $1 --id-prefix $1
+  ccs ${1}_0001.bam ${1}.hifi.bam --num-threads 8
+  samtools fastq ${1}.hifi.bam > ${1}.hifi.fastq
+}
+
+simulate ecoli NC_000913.3 0.9049 42
+simulate bfrag NC_006347.1 1.0991 43
+
+cat ecoli.hifi.fastq bfrag.hifi.fastq \
+  | seqkit shuffle -s 42 \
+  | gzip -9 > data/reads/test_minigut_hifi.fastq.gz
+```
+
+Read IDs keep their `ecoli`/`bfrag` prefix, so the fixture doubles as its own ground truth.
+
+`samplesheets/test_longread.csv` points at this branch on the `vinisalazar` fork; repoint it at
+`nf-core/test-datasets` once the branch is merged upstream. `database_longread.csv` carries the
+`db_type` column (`long` on every row) and passes `--long-reads` to DIAMOND as `db_params`, following
+`nf-core/taxprofiler`'s `database_v3.0.csv`.

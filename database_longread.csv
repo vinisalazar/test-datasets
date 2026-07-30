@@ -1,0 +1,4 @@
+tool,db_name,db_entity,db_params,db_type,db_path
+fmhfunprofiler,fmhfunprofiler1000,,11 1000,long,https://raw.githubusercontent.com/nf-core/test-datasets/funcprofiler/data/database/fmhfunprofiler/KOs_sketched_scaled_1000_demo.sig.zip
+mifaser,GS-24-all,,,long,https://raw.githubusercontent.com/nf-core/test-datasets/funcprofiler/data/database/mifaser/GS-24-all.tar.gz
+diamond,demo,,--long-reads,long,https://raw.githubusercontent.com/nf-core/test-datasets/funcprofiler/data/database/eggnog-mapper/proteome.dmnd
